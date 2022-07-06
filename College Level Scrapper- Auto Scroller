@@ -1,0 +1,204 @@
+from bs4 import BeautifulSoup
+import requests
+import csv
+import time
+import random
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.edge.service import Service
+from selenium.webdriver.chrome.options import Options
+
+#header = ['Name','description','location','ESTD','Rank','Courses','Course Rating','Academic Rating','Accomodation Rating','Faculty Rating','Infra Rating','Placement Rating','Social Rating','Similar College','Website']
+url = "https://collegedunia.com/btech-colleges"
+baseurl = "https://collegedunia.com"
+
+headerList = ['Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/75.0.3770.142 Safari/537.36',
+'Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
+'Mozilla/5.0 (Windows NT 5.1; rv:7.0.1) Gecko/20100101 Firefox/7.0.1',
+'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36 Edge/18.17763',
+'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko',
+'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1',
+'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36',
+'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:18.0) Gecko/20100101 Firefox/18.0',
+'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; .NET CLR 1.1.4322)',
+'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36',
+'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18363',
+'Mozilla/5.0 (iPhone; CPU iPhone OS 14_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.1 Mobile/15E148 Safari/604.1',
+'Mozilla/5.0 (iPhone; CPU iPhone OS 10_0 like Mac OS X) AppleWebKit/602.4.6 (KHTML, like Gecko) Version/10.0 Mobile/14A346 Safari/E7FBAF',
+'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36',
+'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36',
+'Mozilla/5.0 (iPhone; CPU iPhone OS 12_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1.2 Mobile/15E148 Safari/604.1',
+'Mozilla/4.0 (compatible; MSIE 6.0; Windows 98)',
+'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
+'Mozilla/5.0 (Windows NT 5.1; rv:36.0) Gecko/20100101 Firefox/36.0',
+'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/603.3.8 (KHTML, like Gecko)',
+'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36',
+'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0; .NET CLR 1.1.4322)',
+'Mozilla/5.0 (iPhone; CPU iPhone OS 13_6_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.2 Mobile/15E148 Safari/604.1',
+'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299',
+'Mozilla/5.0 (Windows NT 5.1; rv:33.0) Gecko/20100101 Firefox/33.0',
+'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)'
+]
+
+
+options = Options()         # we need to run chrome in headless mode so options
+options.add_argument('headless')
+options.add_argument('window-size=1200x600')    # specifies the window size of the chrome
+options.add_argument('user-agent=Mozilla/5.0 (Linux; Android 9; SM-G611M) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Mobile Safari/537.36')
+options.add_argument('--ignore-certificate-errors-spki-list')
+#browser = webdriver.Chrome(r"C:\Users\Jatin Nagpal\Desktop\chromedriver.exe",chrome_options=options)
+#browser = uc.Chrome(options=options)
+
+chromeService=Service(r"C:\Users\Jatin Nagpal\Desktop\chromedriver.exe")
+
+browser = webdriver.Chrome(service=chromeService,options=options)
+
+browser.get(url)                              # opens the browser with the url from the iterator
+time.sleep(10)                               # waits for the page to load
+elem = browser.find_element_by_tag_name("body")    # gets the body tag from the html under which content is present
+
+no_of_pagedowns = 1500
+
+while no_of_pagedowns:                      # scrolls the pages to the numeber of times
+    elem.send_keys(Keys.PAGE_DOWN)          # pressed the down key
+    time.sleep(0.1)                         # waits for the page to load
+    no_of_pagedowns-=1                      # reduce the number of pagedowns by 1
+
+html = browser.page_source              # gets the page source once it's loaded
+main_page_content = BeautifulSoup(html, "html.parser")     # extracts the features using bs4
+browser.close()                         # closes the broswer ( important !!)
+
+#main_response = requests.get(url, headers=header, timeout=10)
+# to know which user agent is running, 
+# print(main_response.request.headers)
+#print(main_response)
+
+#logHeader = ['URL','Response','Header']
+#responseData = [url,'200',header]
+
+#with open(r"C:\Users\Jatin Nagpal\Desktop\logbook.csv", 'a') as f1:
+#    writer = csv.writer(f1)
+#    #writer.writerow(header)
+#    writer.writerow(responseData)
+
+#main_page_content = BeautifulSoup(main_response.content, "html.parser")
+for i in range(len(main_page_content.find_all("div", {"class": "clg-name-address"}))):
+    paragraphs = main_page_content.find_all("div", {"class": "clg-name-address"})[i]
+    try:
+        link = paragraphs.a['href']
+    except:
+        link = ""    
+    
+    try:
+        name = paragraphs.text
+    except:
+        name = ""
+    newlink = baseurl + link
+    
+    header = {'user_agent':headerList[random.randrange((len(headerList)))]}
+    response = requests.get(newlink,headers=header, timeout=10)
+    
+    responseData = [newlink,response.status_code,header,name]
+    
+    with open(r"C:\Users\Jatin Nagpal\Desktop\IDFC Data collection\Domestic Data\B. Tech new\B. Tech\B. Tech college Level Scrapper and Data\B. Tech College level logbook MD.csv", 'a', encoding="utf-8") as f2:
+        writer = csv.writer(f2)
+        #writer.writerow(header)
+        writer.writerow(responseData)
+    
+    page_content = BeautifulSoup(response.content, "html.parser")
+    try:
+        description = page_content.find("div", {"class": "cdcms_college_highlights"}).p.text.strip()
+    except:
+        description = ""    
+    
+    try:
+        location = page_content.find("div", {"class": "extra-info"}).find_all("span")[0].text.strip()
+    except:
+        location = ""
+    
+    try:
+        estd = page_content.find("div", {"class": "extra-info"}).find_all("span")[4].text.strip()
+    except:
+        estd = ""
+    
+    try:
+        rank = page_content.find("div", {"class": "extra-info"}).find_all("span")[11].text.strip()
+    except:
+        rank = ""
+    
+    courses = []
+    similar_college = []
+    for k in range(len(page_content.find_all("div", {"class": "course-heading"}))):
+        try:
+            courses.append(page_content.find_all("div", {"class": "course-heading"})[k].h3.text.strip())
+        except:
+            continue
+    
+    try:
+        course_rating = page_content.find_all("div", {"class": "rating"})[0].span.text.strip()
+    except:
+        course_rating = ""
+  
+    try:
+        academic_rating = page_content.find_all("div", {"class": "rating-box"})[0].text.strip()
+    except:
+        academic_rating = ""
+    
+    try:
+        accommodation_rating = page_content.find_all("div", {"class": "rating-box"})[1].text.strip()
+    except:
+        accommodation_rating = ""
+    
+    try:
+        faculty_rating = page_content.find_all("div", {"class": "rating-box"})[2].text.strip()
+    except:
+        faculty_rating = ""
+        
+    try:
+        infrastructure_rating = page_content.find_all("div", {"class": "rating-box"})[3].text.strip()
+    except:
+        infrastructure_rating = ""
+    
+    try:
+        placement_rating = page_content.find_all("div", {"class": "rating-box"})[4].text.strip()
+    except:
+        placement_rating = ""
+    
+    try:
+        social_life_rating = page_content.find_all("div", {"class": "rating-box"})[5].text.strip()
+    except:
+        social_life_rating = ""    
+    
+    try:
+        similar_college.append(page_content.find_all("h3", {"class": "college-name"})[0].text.strip())
+    except:
+        pass
+    
+    try:
+        similar_college.append(page_content.find_all("h3", {"class": "college-name"})[1].text.strip())
+    except:
+        pass
+    
+    try:
+        similar_college.append(page_content.find_all("h3", {"class": "college-name"})[2].text.strip())
+    except:
+        pass
+    
+    try:
+        website = page_content.find("div", {"class": "website"}).text.strip()
+    except:
+        website = ""
+    
+    data = [name,description,location,estd,rank,courses,course_rating,academic_rating,accommodation_rating,faculty_rating,infrastructure_rating,placement_rating,social_life_rating,similar_college,website,newlink]
+    
+ 
+
+    with open(r"C:\Users\Jatin Nagpal\Desktop\IDFC Data collection\Domestic Data\B. Tech new\B. Tech\B. Tech college Level Scrapper and Data\B. Tech College Level Data MD.csv", 'a', encoding="utf-8") as f:
+        writer = csv.writer(f)
+        #writer.writerow(header)
+        writer.writerow(data)
+    
+    print("Data Fetched for:",newlink)
+    
+    #time.sleep(20)
+    
